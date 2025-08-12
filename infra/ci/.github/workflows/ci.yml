@@ -1,0 +1,16 @@
+name: CI
+on: { push: { branches: [ main ] }, pull_request: {} }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, 'java-version': '17' }
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Build images
+        run: |
+          docker build -t api:ci apps/api-java
+          docker build -t worker:ci apps/worker-node
+          docker build -t web:ci apps/web-frontend

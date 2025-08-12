@@ -1,0 +1,25 @@
+
+pipeline {
+  agent any
+  environment {
+    REGISTRY = credentials('acr-login-server')
+    ACR_USER = credentials('acr-username')
+    ACR_PASS = credentials('acr-password')
+    IMAGE_TAG = "${env.GIT_COMMIT}"
+  }
+  stages {
+    stage('Checkout') { steps { checkout scm } }
+    stage('Login Registry') {
+      steps { sh 'echo $ACR_PASS | docker login $REGISTRY -u $ACR_USER --password-stdin' }
+    }
+    stage('Build & Push') {
+      steps {
+        sh """
+        docker build -t $REGISTRY/api-java:$IMAGE_TAG apps/api-java && docker push $REGISTRY/api-java:$IMAGE_TAG
+        docker build -t $REGISTRY/worker-node:$IMAGE_TAG apps/worker-node && docker push $REGISTRY/worker-node:$IMAGE_TAG
+        docker build -t $REGISTRY/web-frontend:$IMAGE_TAG apps/web-frontend && docker push $REGISTRY/web-frontend:$IMAGE_TAG
+        """
+      }
+    }
+  }
+}

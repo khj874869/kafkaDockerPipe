@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: ["5432:5432"]
+    volumes: [ "postgres_data:/var/lib/postgresql/data" ]
+
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    environment: [ "ALLOW_ANONYMOUS_LOGIN=yes" ]
+
+  kafka:
+    image: bitnami/kafka:3.7
+    depends_on: [ zookeeper ]
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports: ["9092:9092"]
+
+  api:
+    build: ../apps/api-java
+    depends_on: [ postgres, kafka ]
+    environment:
+      DB_HOST: ${API_DB_HOST}
+      DB_PORT: ${API_DB_PORT}
+      DB_NAME: ${API_DB_NAME}
+      DB_USER: ${API_DB_USER}
+      DB_PASS: ${API_DB_PASS}
+      KAFKA_BROKER: ${API_KAFKA_BROKER}
+    ports: ["${API_PORT}:8080"]
+
+  worker:
+    build: ../apps/worker-node
+    depends_on: [ kafka ]
+    environment:
+      KAFKA_BROKER: ${KAFKA_BROKER}
+      KAFKA_TOPIC: orders
+      METRICS_PORT: 9100
+    ports: ["9100:9100"]
+
+  web:
+    build: ../apps/web-frontend
+    environment:
+      VITE_API_BASE: http://localhost:${API_PORT}
+    ports: ["${WEB_PORT}:5173"]
+    depends_on: [ api ]
+
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    volumes:
+      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["${PROMETHEUS_PORT}:9090"]
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    ports: ["${GRAFANA_PORT}:3000"]
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning
+
+volumes:
+  postgres_data:
