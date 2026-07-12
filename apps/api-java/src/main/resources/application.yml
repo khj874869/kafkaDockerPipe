@@ -5,8 +5,21 @@ spring:
     username: ${DB_USER:orders}
     password: ${DB_PASS:orders}
   jpa:
-    hibernate: { ddl-auto: update }
-  kafka: { bootstrap-servers: ${KAFKA_BROKER:kafka:9092} }
+    hibernate: { ddl-auto: validate }
+    open-in-view: false
+  flyway:
+    enabled: true
+    clean-disabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      properties:
+        spring.json.add.type.headers: false
 management:
   endpoints: { web: { exposure: { include: health,info,prometheus } } }
   metrics: { export: { prometheus: { enabled: true } } }
+app:
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
