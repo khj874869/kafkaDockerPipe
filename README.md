@@ -12,3 +12,5 @@ cp infra/.env.example infra/.env
 make compose-up
 # web: http://localhost:5173, api: http://localhost:8080, grafana: http://localhost:3000
 ```
+
+The API now validates order commands, manages its schema through Flyway, publishes typed Kafka events keyed by order ID, and disables Hibernate schema mutation. The worker rejects malformed events and exposes separate success/failure metrics. CI builds every production image and validates the Compose configuration from the repository root.

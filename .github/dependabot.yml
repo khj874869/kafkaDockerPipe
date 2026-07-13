@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /apps/api-java
+    schedule: { interval: monthly }
+  - package-ecosystem: npm
+    directory: /apps/worker-node
+    schedule: { interval: monthly }
+  - package-ecosystem: npm
+    directory: /apps/web-frontend
+    schedule: { interval: monthly }
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: monthly }
