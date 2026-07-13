@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.testing.Test
-
 plugins {
   id("java")
   id("org.springframework.boot") version "3.3.2"
@@ -20,4 +18,4 @@ dependencies {
   implementation("io.micrometer:micrometer-registry-prometheus")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
-tasks.withType(Test).configureEach { useJUnitPlatform() }
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach { useJUnitPlatform() }
