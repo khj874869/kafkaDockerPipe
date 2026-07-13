@@ -1,7 +1,7 @@
 plugins {
   id("java")
   id("org.springframework.boot") version "3.3.2"
-  id("io.spring.dependency-management") version "1.1.5"
+  id("io.spring.dependency-management") version "1.1.7"
 }
 group = "com.portfolio"; version = "0.0.1"
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(17)) } }
